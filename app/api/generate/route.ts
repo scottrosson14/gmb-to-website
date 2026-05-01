@@ -6,21 +6,36 @@ const anthropic = new Anthropic({
 });
 
 async function searchPlace(query: string) {
-  const response = await fetch(
-    "https://places.googleapis.com/v1/places:searchText",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Goog-Api-Key": process.env.GOOGLE_PLACES_API_KEY!,
-        "X-Goog-FieldMask":
-          "places.id,places.displayName,places.formattedAddress,places.types",
-      },
-      body: JSON.stringify({ textQuery: query }),
-    }
-  );
-  const data = await response.json();
-  return data.places?.[0];
+  // First attempt: search as-is
+  const attempt = async (textQuery: string) => {
+    const response = await fetch(
+      "https://places.googleapis.com/v1/places:searchText",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Goog-Api-Key": process.env.GOOGLE_PLACES_API_KEY!,
+          "X-Goog-FieldMask":
+            "places.id,places.displayName,places.formattedAddress,places.types",
+        },
+        body: JSON.stringify({ textQuery }),
+      }
+    );
+    const data = await response.json();
+    return data.places?.[0] ?? null;
+  };
+
+  // Try original query first
+  let place = await attempt(query);
+  if (place) return place;
+
+  // Fallback: append "near me" to nudge Google toward a specific location
+  place = await attempt(`${query} near me`);
+  if (place) return place;
+
+  // Fallback: append "business" to help with brand-only searches like "Starbucks"
+  place = await attempt(`${query} business`);
+  return place ?? null;
 }
 
 async function getPlaceDetails(placeId: string) {
@@ -65,15 +80,6 @@ export async function POST(request: Request) {
   }
 
   const details = await getPlaceDetails(place.id);
-
-  // Temporary debug log — remove after confirming data shape
-  console.log("DEBUG details:", JSON.stringify({
-    types: details.types,
-    hours: details.regularOpeningHours?.weekdayDescriptions ?? null,
-    reviewCount: details.reviews?.length ?? 0,
-    firstReview: details.reviews?.[0]?.text?.text?.slice(0, 100) ?? null,
-    editorialSummary: details.editorialSummary?.text ?? null,
-  }, null, 2));
 
   const hoursText = formatHours(details.regularOpeningHours);
   const reviewsText = formatReviews(details.reviews);
@@ -137,6 +143,7 @@ Return ONLY the JSON, no other text.`;
       ...details,
       types: details.types ?? [],
       regularOpeningHours: details.regularOpeningHours ?? null,
+      reviews: details.reviews ?? [],
     },
     content: generatedContent,
   });

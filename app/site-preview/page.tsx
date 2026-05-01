@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface Review {
+  rating: number;
+  text?: { text: string };
+  authorAttribution?: { displayName: string };
+  relativePublishTimeDescription?: string;
+}
+
 interface SiteData {
   business: {
     displayName: { text: string };
@@ -13,6 +20,7 @@ interface SiteData {
     rating?: number;
     userRatingCount?: number;
     types?: string[];
+    reviews?: Review[];
   };
   content: {
     headline: string;
@@ -518,6 +526,54 @@ export default function SitePreview() {
           </div>
         </div>
       </section>
+
+      {/* ── Reviews ── */}
+      {business.reviews && business.reviews.length > 0 && (
+        <section className="py-24 px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <p className={`text-xs uppercase tracking-widest font-semibold ${theme.accentColor} mb-3`}>
+                What People Say
+              </p>
+              <h2 className={`text-4xl font-bold text-gray-900 ${theme.headingFont}`}>
+                Customer Reviews
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {business.reviews.slice(0, 3).map((review, i) => (
+                <div key={i} className={`${theme.cardBg} border ${theme.cardBorder} rounded-2xl p-6 shadow-sm`}>
+                  {/* Stars */}
+                  <div className="flex gap-0.5 mb-3">
+                    {Array.from({ length: 5 }).map((_, s) => (
+                      <span key={s} className={s < review.rating ? "text-yellow-400" : "text-gray-200"}>★</span>
+                    ))}
+                  </div>
+                  {/* Review text */}
+                  {review.text?.text && (
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-4">
+                      "{review.text.text.slice(0, 220)}{review.text.text.length > 220 ? "…" : ""}"
+                    </p>
+                  )}
+                  {/* Author */}
+                  <div className="flex items-center gap-2 mt-auto">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${theme.heroBg}`}>
+                      {review.authorAttribution?.displayName?.[0] ?? "?"}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">
+                        {review.authorAttribution?.displayName ?? "Anonymous"}
+                      </p>
+                      {review.relativePublishTimeDescription && (
+                        <p className="text-xs text-gray-400">{review.relativePublishTimeDescription}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Contact ── */}
       <section className="py-24 px-6 max-w-3xl mx-auto text-center">
