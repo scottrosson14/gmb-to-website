@@ -1,5 +1,6 @@
 import { Redis } from "@upstash/redis";
 import { notFound } from "next/navigation";
+import ClaimBanner from "../../components/ClaimBanner";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -314,6 +315,8 @@ export default async function SitePage({ params }: { params: Promise<{ slug: str
 
   return (
     <div className="min-h-screen bg-white font-sans">
+
+      <ClaimBanner businessName={business.displayName?.text} slug={slug} />
 
       {/* ── Hero ── */}
       <section className={`${theme.heroBg} ${theme.heroText} relative overflow-hidden`}>
