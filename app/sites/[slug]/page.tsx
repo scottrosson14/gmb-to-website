@@ -293,18 +293,19 @@ const redis = new Redis({
   token: process.env.KV_REST_API_TOKEN!,
 });
 
-export default async function SitePage({ params }: { params: { slug: string } }) {
+export default async function SitePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   let raw;
   try {
-    raw = await redis.get(`site:${params.slug}`);
+    raw = await redis.get(`site:${slug}`);
   } catch (err) {
     console.error("Redis error:", err);
     return <div className="p-8 text-red-500">Error connecting to database. Please try again.</div>;
   }
 
   if (!raw) {
-    console.error("No data found for slug:", params.slug);
-    return <div className="p-8 text-gray-500">Site not found for slug: {params.slug}</div>;
+    console.error("No data found for slug:", slug);
+    return <div className="p-8 text-gray-500">Site not found for slug: {slug}</div>;
   }
 
   const siteData: SiteData = typeof raw === "string" ? JSON.parse(raw) : raw as SiteData;
