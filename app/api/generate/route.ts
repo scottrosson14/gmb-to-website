@@ -66,6 +66,15 @@ export async function POST(request: Request) {
 
   const details = await getPlaceDetails(place.id);
 
+  // Temporary debug log — remove after confirming data shape
+  console.log("DEBUG details:", JSON.stringify({
+    types: details.types,
+    hours: details.regularOpeningHours?.weekdayDescriptions ?? null,
+    reviewCount: details.reviews?.length ?? 0,
+    firstReview: details.reviews?.[0]?.text?.text?.slice(0, 100) ?? null,
+    editorialSummary: details.editorialSummary?.text ?? null,
+  }, null, 2));
+
   const hoursText = formatHours(details.regularOpeningHours);
   const reviewsText = formatReviews(details.reviews);
   const businessTypes = details.types
