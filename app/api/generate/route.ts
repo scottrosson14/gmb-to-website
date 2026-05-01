@@ -90,9 +90,12 @@ Return ONLY the JSON, no other text.`;
 
   const cleaned = content.text.replace(/```json\n?|\n?```/g, "").trim();
   const generatedContent = JSON.parse(cleaned);
-  
+
   return NextResponse.json({
-    business: details,
+    business: {
+      ...details,
+      types: details.types ?? [],  // ← explicitly pass types through
+    },
     content: generatedContent,
   });
 }
