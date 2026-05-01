@@ -304,6 +304,11 @@ const THEMES: Record<string, Theme> = {
 function getTheme(types: string[] = []): Theme {
   const typeSet = new Set(types.map((t) => t.toLowerCase()));
 
+  // Cafe checked first — Starbucks and similar get tagged as "restaurant" by Google
+  if (typeSet.has("cafe") || typeSet.has("coffee_shop") || typeSet.has("coffee")) {
+    return THEMES.cafe;
+  }
+
   if (
     typeSet.has("restaurant") ||
     typeSet.has("food") ||
@@ -313,10 +318,6 @@ function getTheme(types: string[] = []): Theme {
     typeSet.has("bakery")
   ) {
     return THEMES.restaurant;
-  }
-
-  if (typeSet.has("cafe") || typeSet.has("coffee_shop")) {
-    return THEMES.cafe;
   }
 
   if (
