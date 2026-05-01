@@ -6,7 +6,10 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-const redis = Redis.fromEnv();
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
 
 // Convert a business name + address into a clean URL slug
 // e.g. "Starbucks, 1585 Broadway, New York" → "starbucks-1585-broadway-new-york"

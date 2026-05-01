@@ -288,7 +288,10 @@ function getTheme(types: string[] = []): Theme {
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
-const redis = Redis.fromEnv();
+const redis = new Redis({
+  url: process.env.KV_REST_API_URL!,
+  token: process.env.KV_REST_API_TOKEN!,
+});
 
 export default async function SitePage({ params }: { params: { slug: string } }) {
   const raw = await redis.get(`site:${params.slug}`);
