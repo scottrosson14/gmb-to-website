@@ -28,8 +28,7 @@ export default function Home() {
         return;
       }
 
-      localStorage.setItem("siteData", JSON.stringify(data));
-      router.push("/site-preview");
+      router.push(`/sites/${data.slug}`);
     } catch {
       setError("Failed to generate website. Please try again.");
     } finally {

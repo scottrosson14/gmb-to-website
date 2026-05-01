@@ -1,9 +1,25 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { NextResponse } from "next/server";
+import { Redis } from "@upstash/redis";
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
+
+const redis = Redis.fromEnv();
+
+// Convert a business name + address into a clean URL slug
+// e.g. "Starbucks, 1585 Broadway, New York" → "starbucks-1585-broadway-new-york"
+function toSlug(name: string, address: string): string {
+  const raw = `${name} ${address}`;
+  return raw
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")   // strip punctuation
+    .trim()
+    .replace(/\s+/g, "-")            // spaces → hyphens
+    .replace(/-+/g, "-")             // collapse multiple hyphens
+    .slice(0, 80);                   // keep URLs reasonable length
+}
 
 async function searchPlace(query: string) {
   // First attempt: search as-is
@@ -138,7 +154,7 @@ Return ONLY the JSON, no other text.`;
   const cleaned = content.text.replace(/```json\n?|\n?```/g, "").trim();
   const generatedContent = JSON.parse(cleaned);
 
-  return NextResponse.json({
+  const siteData = {
     business: {
       ...details,
       types: details.types ?? [],
@@ -146,5 +162,23 @@ Return ONLY the JSON, no other text.`;
       reviews: details.reviews ?? [],
     },
     content: generatedContent,
-  });
+    generatedAt: new Date().toISOString(),
+  };
+
+  // Generate slug and handle collisions by appending a short suffix
+  const baseSlug = toSlug(
+    details.displayName?.text ?? "business",
+    details.formattedAddress ?? ""
+  );
+
+  // Check if slug already exists — if so, append timestamp suffix
+  const existing = await redis.get(`site:${baseSlug}`);
+  const slug = existing
+    ? `${baseSlug}-${Date.now().toString(36)}`
+    : baseSlug;
+
+  // Save to KV — no expiry, sites persist indefinitely
+  await redis.set(`site:${slug}`, JSON.stringify(siteData));
+
+  return NextResponse.json({ slug });
 }
