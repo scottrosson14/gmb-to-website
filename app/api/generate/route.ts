@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     .map((t: string) => t.replace(/_/g, " "))
     .join(", ");
 
-  const prompt = `You are a professional web copywriter. Based on the following business information, generate compelling, specific website content. Use real details from the reviews and hours — avoid generic filler.
+  const prompt = `You are a professional web copywriter. Based on the following business information, generate compelling, highly specific website content. Every field must feel like it was written for THIS business — not a template. Use real names, real details, real themes from reviews.
 
 Business Information:
 - Name: ${details.displayName?.text}
@@ -118,24 +118,39 @@ Business Information:
 - Description: ${details.editorialSummary?.text || "Not provided"}
 - Hours: ${hoursText}
 
-Customer Reviews (use the language and themes customers mention to inform the copy):
+Customer Reviews:
 ${reviewsText}
 
 Instructions:
-- Write the headline and tagline to feel specific to THIS business, not generic
-- If hours show 24/7 or emergency availability, highlight that in the subheadline or about section
-- Pull real themes from the reviews (e.g. if customers mention "fast response" or "fair pricing", use that)
-- Services should reflect the actual business type, not placeholder text
-- The CTA should match the business type (e.g. "Call Now" for home services, "Book a Table" for restaurants)
+- Pull real language and themes directly from the reviews (e.g. if customers say "fast response", "fair pricing", "friendly staff" — use those exact phrases)
+- If hours show 24/7 or emergency availability, call that out prominently
+- Services must reflect the actual business type — no placeholders
+- The CTA must match the business (e.g. "Call Now" for contractors, "Book a Table" for restaurants, "Schedule a Visit" for health)
+- whyUs items must be specific differentiators grounded in the reviews or business data — not generic claims like "We care about customers"
+- The highlight stat should be a real, impressive number pulled from the data (rating count, years in business if inferrable, etc.)
+- The highlight label should describe what the stat means (e.g. "5-Star Reviews", "Happy Customers", "Years Serving Brooklyn")
+- FAQ questions and answers must be realistic for this specific business type and location
 
-Generate a JSON response with the following structure:
+Generate a JSON response with this exact structure:
 {
-  "headline": "A compelling headline (max 10 words)",
-  "subheadline": "A supporting subheadline that highlights a key differentiator (max 20 words)",
-  "about": "A 2-3 sentence about section using specific details from the business info and reviews",
-  "services": ["service 1", "service 2", "service 3", "service 4"],
+  "headline": "A compelling, business-specific headline (max 10 words)",
+  "subheadline": "A supporting subheadline highlighting a real differentiator from the reviews (max 20 words)",
+  "about": "2-3 sentences using specific details from the reviews and business info. Mention the neighborhood or city if known.",
+  "services": ["specific service 1", "specific service 2", "specific service 3", "specific service 4", "specific service 5", "specific service 6"],
   "cta": "Call to action button text (max 5 words)",
-  "tagline": "A memorable tagline (max 8 words)"
+  "tagline": "A memorable, business-specific tagline (max 8 words)",
+  "whyUs": [
+    { "title": "Short benefit title (3-5 words)", "body": "One sentence explanation grounded in real review themes" },
+    { "title": "Short benefit title (3-5 words)", "body": "One sentence explanation grounded in real review themes" },
+    { "title": "Short benefit title (3-5 words)", "body": "One sentence explanation grounded in real review themes" }
+  ],
+  "highlightStat": "A number (e.g. 4.9, 500+, 12)",
+  "highlightLabel": "What the stat represents (e.g. 'Star Rating', '5-Star Reviews', 'Years in Business')",
+  "faq": [
+    { "question": "A realistic customer question for this business type", "answer": "A concise, helpful answer (1-2 sentences)" },
+    { "question": "A realistic customer question for this business type", "answer": "A concise, helpful answer (1-2 sentences)" },
+    { "question": "A realistic customer question for this business type", "answer": "A concise, helpful answer (1-2 sentences)" }
+  ]
 }
 
 Return ONLY the JSON, no other text.`;

@@ -30,6 +30,10 @@ interface SiteData {
     services: string[];
     cta: string;
     tagline: string;
+    whyUs?: { title: string; body: string }[];
+    highlightStat?: string;
+    highlightLabel?: string;
+    faq?: { question: string; answer: string }[];
   };
   generatedAt?: string;
 }
@@ -345,12 +349,20 @@ export default async function SitePage({ params }: { params: Promise<{ slug: str
               </a>
             )}
           </div>
-          {business.rating && (
-            <div className="mt-10 inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-5 py-2 rounded-full">
-              <span className="text-yellow-300 font-bold">{business.rating} ★</span>
-              <span className={`${theme.heroSubText} text-sm`}>{business.userRatingCount?.toLocaleString()} reviews</span>
-            </div>
-          )}
+          <div className="mt-10 flex flex-wrap justify-center gap-4">
+            {business.rating && (
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-5 py-2 rounded-full">
+                <span className="text-yellow-300 font-bold">{business.rating} ★</span>
+                <span className={`${theme.heroSubText} text-sm`}>{business.userRatingCount?.toLocaleString()} reviews</span>
+              </div>
+            )}
+            {content.highlightStat && content.highlightLabel && (
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm px-5 py-2 rounded-full">
+                <span className="text-white font-bold">{content.highlightStat}</span>
+                <span className={`${theme.heroSubText} text-sm`}>{content.highlightLabel}</span>
+              </div>
+            )}
+          </div>
         </div>
       </section>
 
@@ -361,8 +373,29 @@ export default async function SitePage({ params }: { params: Promise<{ slug: str
         <p className="text-gray-600 text-lg leading-relaxed">{content.about}</p>
       </section>
 
+      {/* ── Why Us ── */}
+      {content.whyUs && content.whyUs.length > 0 && (
+        <section className={`${theme.sectionBg} py-24 px-6`}>
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-14">
+              <p className={`text-xs uppercase tracking-widest font-semibold ${theme.accentColor} mb-3`}>Why Choose Us</p>
+              <h2 className={`text-4xl font-bold text-gray-900 ${theme.headingFont}`}>What Sets Us Apart</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {content.whyUs.map((item, i) => (
+                <div key={i} className={`${theme.cardBg} border ${theme.cardBorder} rounded-2xl p-8 shadow-sm`}>
+                  <div className={`text-2xl mb-4`}>{theme.icon}</div>
+                  <h3 className={`font-bold text-gray-900 text-lg mb-2 ${theme.headingFont}`}>{item.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── Services ── */}
-      <section className={`${theme.sectionBg} py-24 px-6`}>
+      <section className="py-24 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <p className={`text-xs uppercase tracking-widest font-semibold ${theme.accentColor} mb-3`}>{theme.servicesLabel}</p>
@@ -433,6 +466,24 @@ export default async function SitePage({ params }: { params: Promise<{ slug: str
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── FAQ ── */}
+      {content.faq && content.faq.length > 0 && (
+        <section className="py-24 px-6 max-w-3xl mx-auto">
+          <div className="text-center mb-14">
+            <p className={`text-xs uppercase tracking-widest font-semibold ${theme.accentColor} mb-3`}>FAQ</p>
+            <h2 className={`text-4xl font-bold text-gray-900 ${theme.headingFont}`}>Common Questions</h2>
+          </div>
+          <div className="space-y-4">
+            {content.faq.map((item, i) => (
+              <div key={i} className={`border ${theme.cardBorder} rounded-2xl p-6`}>
+                <h3 className={`font-bold text-gray-900 text-base mb-2 ${theme.headingFont}`}>{item.question}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{item.answer}</p>
+              </div>
+            ))}
           </div>
         </section>
       )}
