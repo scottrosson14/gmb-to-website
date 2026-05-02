@@ -183,5 +183,8 @@ Return ONLY the JSON, no other text.`;
   // Save to KV — no expiry, sites persist indefinitely
   await redis.set(`site:${slug}`, JSON.stringify(siteData));
 
-  return NextResponse.json({ slug });
+  return NextResponse.json({
+    slug,
+    existingWebsite: details.websiteUri ?? null,
+  });
 }

@@ -12,6 +12,7 @@ export default function Home() {
   const [modal, setModal] = useState<{
     slug: string;
     businessName: string;
+    existingWebsite: string | null;
   } | null>(null);
   const [email, setEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
@@ -40,7 +41,11 @@ export default function Home() {
         return;
       }
 
-      setModal({ slug: data.slug, businessName: query });
+      setModal({
+        slug: data.slug,
+        businessName: query,
+        existingWebsite: data.existingWebsite ?? null,
+      });
     } catch {
       setError("Failed to generate website. Please try again.");
     } finally {
@@ -137,6 +142,37 @@ export default function Home() {
               <h2 className="text-2xl font-bold text-gray-900 mb-1">Your site is live!</h2>
               <p className="text-gray-500 text-sm">Save your URL — it's the only way to get back to your site.</p>
             </div>
+
+            {/* Website check banner */}
+            {modal.existingWebsite ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
+                <p className="text-amber-800 text-sm font-semibold mb-1">⚠️ This business already has a website</p>
+                <p className="text-amber-700 text-xs mb-2">Compare it to the one we just built:</p>
+                <div className="flex flex-col gap-1.5">
+                  <a
+                    href={modal.existingWebsite}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-amber-700 underline underline-offset-2 truncate"
+                  >
+                    Their current site →
+                  </a>
+                  <a
+                    href={siteUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-indigo-600 underline underline-offset-2"
+                  >
+                    Your generated site →
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-5">
+                <p className="text-green-800 text-sm font-semibold">✅ This business has no website</p>
+                <p className="text-green-700 text-xs mt-1">You just built them one in seconds.</p>
+              </div>
+            )}
 
             {/* URL display + copy */}
             <div className="bg-gray-50 rounded-xl p-4 mb-6">
